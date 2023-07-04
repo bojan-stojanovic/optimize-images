@@ -4,15 +4,17 @@
   "description": "",
   "main": "index.mjs",
   "scripts": {
-    "optimize": "node scripts/optimizeImages.mjs",
+    "optimize": "node scripts/optimizeImages.mjs && npm run svg",
     "webp": "node scripts/generateWebp.mjs",
     "avif": "node scripts/generateAvif.mjs",
+    "svg": "svgo -f img_src/ -o img_dist",
     "all": "npm run optimize && npm run webp && npm run avif"
   },
   "keywords": [],
   "author": "Bojan Stojanovic",
   "license": "ISC",
   "dependencies": {
-    "sharp": "^0.32.1"
+    "sharp": "^0.32.1",
+    "svgo": "^3.0.2"
   }
 }
