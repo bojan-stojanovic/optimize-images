@@ -1,0 +1,18 @@
+{
+  "name": "opti-img",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.mjs",
+  "scripts": {
+    "optimize": "node scripts/optimizeImages.mjs",
+    "webp": "node scripts/generateWebp.mjs",
+    "avif": "node scripts/generateAvif.mjs",
+    "all": "npm run optimize && npm run webp && npm run avif"
+  },
+  "keywords": [],
+  "author": "Bojan Stojanovic",
+  "license": "ISC",
+  "dependencies": {
+    "sharp": "^0.32.1"
+  }
+}
