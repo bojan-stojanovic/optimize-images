@@ -7,6 +7,7 @@ const INPUT_DIR = "./img_src";
 const OUTPUT_DIR = "./img_dist";
 let counter = 0;
 
+// get all files recursively
 const getFileList = async (dirName) => {
     let files = [];
     const items = await readdir(dirName, { withFileTypes: true });
@@ -28,6 +29,7 @@ const getFileList = async (dirName) => {
 getFileList(INPUT_DIR).then((files) => {
     console.log("\x1b[36mGenerating webp started! \n\x1b[0m");
 
+    // get number of jpg, jpeg and png files
     const filesNumber = [...files.filter(item => item.split(".").pop() === "jpg" || item.split(".").pop() === "jpeg" || item.split(".").pop() === "png")].length;
 
     // create outupt directory if it doesn't exist
@@ -36,8 +38,8 @@ getFileList(INPUT_DIR).then((files) => {
     }
 
     for (const file of files) {
-        const _file = file.split("/").pop(); // get file without path
-        const fileName = path.parse(file).name; // get file without path and extension
+        const _file = file.split("/").pop(); // get file name without path
+        const fileName = path.parse(file).name; // get file name without path and extension
         const fileType = path.extname(file); // get file type
         const subDir = path.dirname(file).split(INPUT_DIR).join(""); // get sub-directory name
 
@@ -56,12 +58,14 @@ getFileList(INPUT_DIR).then((files) => {
             });
         }
 
+        // dynamically change output directory
         if (subDir === INPUT_DIR) {
             outputDir = OUTPUT_DIR + "/";
         } else {
             outputDir = OUTPUT_DIR + subDir + "/";
         }
 
+        // process jpg, jpeg and png files into webp
         if (fileType === ".jpg" || fileType === ".jpeg" || fileType === ".png") {
             sharp(file)
                 .webp({
@@ -72,6 +76,7 @@ getFileList(INPUT_DIR).then((files) => {
                     const optFileSize = +((info.size / 1024).toFixed(2));
                     const optPercentage = +(((optFileSize / origFileSize) * 100).toFixed(2));
 
+                    // log file size reduction
                     console.log(`${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[37mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`);
 
                     taskDone(filesNumber);
@@ -80,10 +85,11 @@ getFileList(INPUT_DIR).then((files) => {
     }
 });
 
+// log message once processing of files is done
 function taskDone(filesNumber) {
     counter++;
 
     if (counter === filesNumber) {
-        console.log("\n\x1b[32mGenerating webp images completed!\n\x1b[0m")
+        console.log("\n\x1b[32mGenerating webp images completed!\n\x1b[0m");
     }
 }
