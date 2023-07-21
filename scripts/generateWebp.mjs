@@ -74,7 +74,7 @@ getFileList(INPUT_DIR).then((files) => {
                 })
                 .toFile(outputDir + fileName + ".webp", (err, info) => {
                     const optFileSize = +((info.size / 1024).toFixed(2));
-                    const optPercentage = +(((optFileSize / origFileSize) * 100).toFixed(2));
+                    const optPercentage = +((((origFileSize - optFileSize) / origFileSize) * 100).toFixed(2));
 
                     // log file size reduction
                     console.log(`${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[37mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`);

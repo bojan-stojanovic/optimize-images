@@ -37,6 +37,8 @@ getFileList(INPUT_DIR).then((files) => {
         fs.mkdirSync(OUTPUT_DIR)
     }
 
+    
+
     for (const file of files) {
         const _file = file.split("/").pop(); // get file name without path
         const fileType = path.extname(file); // get file type
@@ -44,7 +46,7 @@ getFileList(INPUT_DIR).then((files) => {
 
         let outputDir;
         let origFileSize;
-
+        
         // get original file size before optimization
         if (fileType !== "") {
             origFileSize = +((fs.statSync(file).size / 1024).toFixed(2));
@@ -73,7 +75,7 @@ getFileList(INPUT_DIR).then((files) => {
                 })
                 .toFile(outputDir + _file, (err, info) => {
                     const optFileSize = +((info.size / 1024).toFixed(2));
-                    const optPercentage = +(((optFileSize / origFileSize) * 100).toFixed(2));
+                    const optPercentage = +((((origFileSize - optFileSize) / origFileSize) * 100).toFixed(2));
 
                     // log file size reduction
                     console.log(`${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[0mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`);
@@ -91,7 +93,7 @@ getFileList(INPUT_DIR).then((files) => {
                 })
                 .toFile(outputDir + _file, (err, info) => {
                     const optFileSize = +((info.size / 1024).toFixed(2));
-                    const optPercentage = +(((optFileSize / origFileSize) * 100).toFixed(2));
+                    const optPercentage = +((((origFileSize - optFileSize) / origFileSize) * 100).toFixed(2));
 
                     // log file size reduction
                     console.log(`${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[0mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`);
