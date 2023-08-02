@@ -71,7 +71,8 @@ getFileList(INPUT_DIR).then((files) => {
             sharp(file)
                 .jpeg({
                     quality: 75,
-                    mozjpeg: true
+                    mozjpeg: true,
+                    progressive: true
                 })
                 .toFile(outputDir + _file, (err, info) => {
                     const optFileSize = +((info.size / 1024).toFixed(2));
@@ -89,7 +90,8 @@ getFileList(INPUT_DIR).then((files) => {
             sharp(file)
                 .png({
                     compressionLevel: 9,
-                    effort: 10
+                    effort: 10,
+                    progressive: true
                 })
                 .toFile(outputDir + _file, (err, info) => {
                     const optFileSize = +((info.size / 1024).toFixed(2));
