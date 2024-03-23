@@ -69,7 +69,7 @@ getFileList(INPUT_DIR).then((files) => {
         if (fileType === ".jpg" || fileType === ".jpeg" || fileType === ".png") {
             sharp(file)
                 .webp({
-                    quality: 75,
+                    quality: 60,
                     effort: 6
                 })
                 .toFile(outputDir + fileName + ".webp", (err, info) => {

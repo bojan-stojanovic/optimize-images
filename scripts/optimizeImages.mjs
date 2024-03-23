@@ -70,7 +70,7 @@ getFileList(INPUT_DIR).then((files) => {
         if (fileType === ".jpg" || fileType === ".jpeg") {
             sharp(file)
                 .jpeg({
-                    quality: 75,
+                    quality: 60,
                     mozjpeg: true,
                     progressive: true
                 })

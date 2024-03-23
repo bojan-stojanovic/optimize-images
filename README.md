@@ -5,7 +5,7 @@ Nodejs script using [sharp](https://sharp.pixelplumbing.com/ "sharp - High perfo
 This script can optimize **jpg**, **jpeg**, **png** or **svg** files. It can also generate next-gen image formats **webp** and **avif** out of **jpg**, **jpeg** or **png** images.
 
 # Available scripts
-`npm run optimize` - optimizes **jpg**, **jpeg**, **png** and **svg** images.  
+`npm run optimize` - optimizes **jpg**, **jpeg**, **png** images.  
 `npm run webp` - generates **webp** images.  
 `npm run avif` - generates **avif** images.  
 `npm run svg` - optimizes **svg** images.  

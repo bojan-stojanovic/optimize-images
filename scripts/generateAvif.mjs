@@ -69,8 +69,9 @@ getFileList(INPUT_DIR).then((files) => {
         if (fileType === ".jpg" || fileType === ".jpeg" || fileType === ".png") {
             sharp(file)
                 .avif({
-                    quality: 60,
-                    chromaSubsampling: "4:2:0"
+                    quality: 50,
+                    chromaSubsampling: "4:2:0",
+                    effort: 9
                 })
                 .toFile(outputDir + fileName + ".avif", (err, info) => {
                     const optFileSize = +((info.size / 1024).toFixed(2));
