@@ -30,11 +30,18 @@ getFileList(INPUT_DIR).then((files) => {
     console.log("\x1b[36mGenerating webp started! \n\x1b[0m");
 
     // get number of jpg, jpeg and png files
-    const filesNumber = [...files.filter(item => item.split(".").pop() === "jpg" || item.split(".").pop() === "jpeg" || item.split(".").pop() === "png")].length;
+    const filesNumber = [
+        ...files.filter(
+            (item) =>
+                item.split(".").pop() === "jpg" ||
+                item.split(".").pop() === "jpeg" ||
+                item.split(".").pop() === "png",
+        ),
+    ].length;
 
     // create outupt directory if it doesn't exist
     if (!fs.existsSync(OUTPUT_DIR)) {
-        fs.mkdirSync(OUTPUT_DIR)
+        fs.mkdirSync(OUTPUT_DIR);
     }
 
     for (const file of files) {
@@ -48,7 +55,7 @@ getFileList(INPUT_DIR).then((files) => {
 
         // get original file size before optimization
         if (fileType !== "") {
-            origFileSize = +((fs.statSync(file).size / 1024).toFixed(2));
+            origFileSize = +(fs.statSync(file).size / 1024).toFixed(2);
         }
 
         // create sub-directory if it doesn't exist
@@ -66,18 +73,28 @@ getFileList(INPUT_DIR).then((files) => {
         }
 
         // process jpg, jpeg and png files into webp
-        if (fileType === ".jpg" || fileType === ".jpeg" || fileType === ".png") {
+        if (
+            fileType === ".jpg" ||
+            fileType === ".jpeg" ||
+            fileType === ".png"
+        ) {
+            // https://sharp.pixelplumbing.com/api-output#webp
             sharp(file)
                 .webp({
-                    quality: 60,
-                    effort: 6
+                    quality: 60, // 1-100
+                    effort: 6, // CPU effort, between 0 (fastest) and 6 (slowest)
                 })
                 .toFile(outputDir + fileName + ".webp", (err, info) => {
-                    const optFileSize = +((info.size / 1024).toFixed(2));
-                    const optPercentage = +((((origFileSize - optFileSize) / origFileSize) * 100).toFixed(2));
+                    const optFileSize = +(info.size / 1024).toFixed(2);
+                    const optPercentage = +(
+                        ((origFileSize - optFileSize) / origFileSize) *
+                        100
+                    ).toFixed(2);
 
                     // log file size reduction
-                    console.log(`${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[37mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`);
+                    console.log(
+                        `${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[37mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`,
+                    );
 
                     taskDone(filesNumber);
                 });
