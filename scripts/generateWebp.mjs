@@ -29,12 +29,13 @@ const getFileList = async (dirName) => {
 getFileList(INPUT_DIR).then((files) => {
     console.log("\x1b[36mGenerating webp started! \n\x1b[0m");
 
-    // get number of jpg, jpeg and png files
+    // get number of jpg, jpeg, gif and png files
     const filesNumber = [
         ...files.filter(
             (item) =>
                 item.split(".").pop() === "jpg" ||
                 item.split(".").pop() === "jpeg" ||
+                item.split(".").pop() === "gif" ||
                 item.split(".").pop() === "png",
         ),
     ].length;
@@ -72,14 +73,15 @@ getFileList(INPUT_DIR).then((files) => {
             outputDir = OUTPUT_DIR + subDir + "/";
         }
 
-        // process jpg, jpeg and png files into webp
+        // process jpg, jpeg, gif and png files into webp
         if (
             fileType === ".jpg" ||
             fileType === ".jpeg" ||
+            fileType === ".gif" ||
             fileType === ".png"
         ) {
             // https://sharp.pixelplumbing.com/api-output#webp
-            sharp(file)
+            sharp(file, fileType === ".gif" ? { animated: true } : {})
                 .webp({
                     quality: 60, // 1-100
                     effort: 6, // CPU effort, between 0 (fastest) and 6 (slowest)
