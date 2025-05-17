@@ -1,113 +1,77 @@
-import fs from "fs";
-import { readdir } from "fs/promises";
+import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
 
 const INPUT_DIR = "./img_src";
 const OUTPUT_DIR = "./img_dist";
-let counter = 0;
 
-// get all files recursively
-const getFileList = async (dirName) => {
+// Get all files recursively
+async function getFileList(dirName) {
     let files = [];
-    const items = await readdir(dirName, { withFileTypes: true });
+    const items = await fs.readdir(dirName, { withFileTypes: true });
 
     for (const item of items) {
+        const fullPath = `${dirName}/${item.name}`;
         if (item.isDirectory()) {
-            files = [
-                ...files,
-                ...(await getFileList(`${dirName}/${item.name}`)),
-            ];
+            files.push(...await getFileList(fullPath));
         } else {
-            files.push(`${dirName}/${item.name}`);
+            files.push(fullPath);
         }
     }
 
     return files;
-};
+}
 
-getFileList(INPUT_DIR).then((files) => {
+async function processFiles() {
     console.log("\x1b[36mGenerating avif started! \n\x1b[0m");
 
-    // get number of jpg, jpeg and png files
-    const filesNumber = [
-        ...files.filter(
-            (item) =>
-                item.split(".").pop() === "jpg" ||
-                item.split(".").pop() === "jpeg" ||
-                item.split(".").pop() === "png",
-        ),
-    ].length;
+    const files = await getFileList(INPUT_DIR);
 
-    // create outupt directory if it doesn't exist
-    if (!fs.existsSync(OUTPUT_DIR)) {
-        fs.mkdirSync(OUTPUT_DIR);
-    }
+    // Filter relevant image files
+    const imageFiles = files.filter(file =>
+        /\.(jpg|jpeg|png)$/i.test(path.extname(file))
+    );
 
-    for (const file of files) {
-        const _file = file.split("/").pop(); // get file name without path
-        const fileName = path.parse(file).name; // get file name without path and extension
-        const fileType = path.extname(file); // get file type
-        const subDir = path.dirname(file).split(INPUT_DIR).join(""); // get sub-directory name
+    // Ensure output directory exists
+    await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
-        let outputDir;
-        let origFileSize;
+    for (const file of imageFiles) {
+        const _file = path.basename(file);
+        const fileName = path.parse(file).name;
+        const fileType = path.extname(file);
+        const subDir = path.relative(INPUT_DIR, path.dirname(file));
 
-        // get original file size before optimization
-        if (fileType !== "") {
-            origFileSize = +(fs.statSync(file).size / 1024).toFixed(2);
-        }
+        let outputDir = subDir ? `${OUTPUT_DIR}/${subDir}` : OUTPUT_DIR;
 
-        // create sub-directory if it doesn't exist
-        if (!fs.existsSync(OUTPUT_DIR + subDir) && subDir !== INPUT_DIR) {
-            fs.mkdirSync(OUTPUT_DIR + subDir, {
-                recursive: true,
-            });
-        }
+        // Ensure sub-directory exists
+        await fs.mkdir(outputDir, { recursive: true });
 
-        // dynamically change output directory
-        if (subDir === INPUT_DIR) {
-            outputDir = OUTPUT_DIR + "/";
-        } else {
-            outputDir = OUTPUT_DIR + subDir + "/";
-        }
+        if ([".jpg", ".jpeg", ".png"].includes(fileType)) {
+            const origFileSize = +(await fs.stat(file)).size / 1024;
+            const outputFilePath = `${outputDir}/${fileName}.avif`;
 
-        // process jpg, jpeg and png files into avif
-        if (
-            fileType === ".jpg" ||
-            fileType === ".jpeg" ||
-            fileType === ".png"
-        ) {
-            // https://sharp.pixelplumbing.com/api-output#avif
-            sharp(file)
-                .avif({
-                    quality: 50, // 1-100
-                    chromaSubsampling: "4:2:0",
-                    effort: 9, // CPU effort, between 0 (fastest) and 9 (slowest)
-                })
-                .toFile(outputDir + fileName + ".avif", (err, info) => {
-                    const optFileSize = +(info.size / 1024).toFixed(2);
-                    const optPercentage = +(
-                        ((origFileSize - optFileSize) / origFileSize) *
-                        100
-                    ).toFixed(2);
+            try {
+                const info = await sharp(file)
+                    .avif({
+                        quality: 50,
+                        chromaSubsampling: "4:2:0",
+                        effort: 9,
+                    })
+                    .toFile(outputFilePath);
 
-                    // log file size reduction
-                    console.log(
-                        `${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[37mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`,
-                    );
+                const optFileSize = +info.size / 1024;
+                const optPercentage = ((origFileSize - optFileSize) / origFileSize) * 100;
 
-                    taskDone(filesNumber);
-                });
+                console.log(
+                    `${_file} size is reduced from \x1b[31m${origFileSize.toFixed(2)}kb\x1b[37m to \x1b[32m${optFileSize.toFixed(2)}kb\x1b[33m (${optPercentage.toFixed(2)}% saving!)\x1b[0m`
+                );
+            } catch (err) {
+                console.error(`Error processing ${file}:`, err);
+            }
         }
     }
-});
 
-// log message once processing of files is done
-function taskDone(filesNumber) {
-    counter++;
-
-    if (counter === filesNumber) {
-        console.log("\n\x1b[32mGenerating avif images completed!\n\x1b[0m");
-    }
+    console.log("\n\x1b[32mGenerating avif images completed!\n\x1b[0m");
 }
+
+processFiles().catch(err => console.error("An error occurred:", err));

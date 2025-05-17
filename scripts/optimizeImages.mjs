@@ -1,134 +1,85 @@
-import fs from "fs";
-import { readdir } from "fs/promises";
-import path from "path";
-import sharp from "sharp";
+import { promises as fsPromises } from 'fs';
+import path from 'path';
+import sharp from 'sharp';
 
-const INPUT_DIR = "./img_src";
-const OUTPUT_DIR = "./img_dist";
-let counter = 0;
+const INPUT_DIR = './img_src';
+const OUTPUT_DIR = './img_dist';
 
-// get all files recursively
-const getFileList = async (dirName) => {
+// Get all files recursively
+async function getFileList(dirName) {
     let files = [];
-    const items = await readdir(dirName, { withFileTypes: true });
+    const items = await fsPromises.readdir(dirName, { withFileTypes: true });
 
     for (const item of items) {
         if (item.isDirectory()) {
-            files = [
-                ...files,
-                ...(await getFileList(`${dirName}/${item.name}`)),
-            ];
+            files.push(...await getFileList(`${dirName}/${item.name}`));
         } else {
             files.push(`${dirName}/${item.name}`);
         }
     }
 
     return files;
-};
+}
 
-getFileList(INPUT_DIR).then((files) => {
+async function processFiles(files) {
     console.log("\x1b[36mImage optimization started! \n\x1b[0m");
 
-    // get number of jpg, jpeg and png files
-    const filesNumber = [
-        ...files.filter(
-            (item) =>
-                item.split(".").pop() === "jpg" ||
-                item.split(".").pop() === "jpeg" ||
-                item.split(".").pop() === "png",
-        ),
-    ].length;
+    const imageFiles = files.filter(
+        (file) => /\.(jpg|jpeg|png)$/i.test(file)
+    );
 
-    // create outupt directory if it doesn't exist
-    if (!fs.existsSync(OUTPUT_DIR)) {
-        fs.mkdirSync(OUTPUT_DIR);
+    await fsPromises.mkdir(OUTPUT_DIR, { recursive: true });
+
+    let counter = 0;
+
+    for (const file of imageFiles) {
+        const _file = path.basename(file);
+        const fileType = path.extname(file).toLowerCase();
+        const subDir = path.relative(INPUT_DIR, path.dirname(file));
+        const outputDir = path.join(OUTPUT_DIR, subDir);
+
+        await fsPromises.mkdir(outputDir, { recursive: true });
+
+        try {
+            const origStats = await fsPromises.stat(file);
+            const origFileSize = (origStats.size / 1024).toFixed(2);
+
+            let processedFile;
+            if (fileType === '.jpg' || fileType === '.jpeg') {
+                processedFile = sharp(file)
+                    .jpeg({
+                        quality: 75,
+                        mozjpeg: true,
+                        progressive: true,
+                    });
+            } else if (fileType === '.png') {
+                processedFile = sharp(file)
+                    .png({
+                        compressionLevel: 9,
+                        effort: 10,
+                        progressive: true,
+                        quality: 75,
+                    });
+            }
+
+            const info = await processedFile.toFile(path.join(outputDir, _file));
+            const optFileSize = (info.size / 1024).toFixed(2);
+            const optPercentage = (((origFileSize - optFileSize) / origFileSize) * 100).toFixed(2);
+
+            console.log(
+                `${_file} size is reduced from \x1b[31m${origFileSize}kb\x1b[0m to \x1b[32m${optFileSize}kb\x1b[33m (${optPercentage}% saving!)\x1b[0m`
+            );
+
+        } catch (err) {
+            console.error(`Error processing ${file}:`, err);
+        }
+
+        counter++;
     }
 
-    for (const file of files) {
-        const _file = file.split("/").pop(); // get file name without path
-        const fileType = path.extname(file); // get file type
-        const subDir = path.dirname(file).split(INPUT_DIR).join(""); // get sub-directory name
-
-        let outputDir;
-        let origFileSize;
-
-        // get original file size before optimization
-        if (fileType !== "") {
-            origFileSize = +(fs.statSync(file).size / 1024).toFixed(2);
-        }
-
-        // create sub-directory if it doesn't exist
-        if (!fs.existsSync(OUTPUT_DIR + subDir) && subDir !== INPUT_DIR) {
-            fs.mkdirSync(OUTPUT_DIR + subDir, {
-                recursive: true,
-            });
-        }
-
-        // dynamically change output directory
-        if (subDir === INPUT_DIR) {
-            outputDir = OUTPUT_DIR + "/";
-        } else {
-            outputDir = OUTPUT_DIR + subDir + "/";
-        }
-
-        // process jpg or jpeg files
-        if (fileType === ".jpg" || fileType === ".jpeg") {
-            // https://sharp.pixelplumbing.com/api-output#jpeg
-            sharp(file)
-                .jpeg({
-                    quality: 75, // 1-100
-                    mozjpeg: true,
-                    progressive: true,
-                })
-                .toFile(outputDir + _file, (err, info) => {
-                    const optFileSize = +(info.size / 1024).toFixed(2);
-                    const optPercentage = +(
-                        ((origFileSize - optFileSize) / origFileSize) *
-                        100
-                    ).toFixed(2);
-
-                    // log file size reduction
-                    console.log(
-                        `${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[0mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`,
-                    );
-
-                    taskDone(filesNumber);
-                });
-        }
-
-        // proces png files
-        if (fileType === ".png") {
-            // https://sharp.pixelplumbing.com/api-output#png
-            sharp(file)
-                .png({
-                    compressionLevel: 9, // zlib compression level, 0 (fastest, largest) to 9 (slowest, smallest)
-                    effort: 10, // CPU effort, between 1 (fastest) and 10 (slowest), sets palette to true
-                    progressive: true,
-                    quality: 75, // 1-100
-                })
-                .toFile(outputDir + _file, (err, info) => {
-                    const optFileSize = +(info.size / 1024).toFixed(2);
-                    const optPercentage = +(
-                        ((origFileSize - optFileSize) / origFileSize) *
-                        100
-                    ).toFixed(2);
-
-                    // log file size reduction
-                    console.log(
-                        `${_file} size is reduced from \x1b[31m${origFileSize}kb \x1b[0mto \x1b[32m${optFileSize}kb \x1b[33m(${optPercentage}% saving!)\x1b[0m`,
-                    );
-
-                    taskDone(filesNumber);
-                });
-        }
-    }
-});
-
-// log message once processing of files is done
-function taskDone(filesNumber) {
-    counter++;
-
-    if (counter === filesNumber) {
-        console.log("\n\x1b[32mOptimize images task completed!\n\x1b[0m");
-    }
+    console.log("\n\x1b[32mOptimize images task completed!\n\x1b[0m");
 }
+
+getFileList(INPUT_DIR)
+    .then(processFiles)
+    .catch(err => console.error("An error occurred:", err));
