@@ -30,8 +30,6 @@ async function processFiles(files) {
 
     await fsPromises.mkdir(OUTPUT_DIR, { recursive: true });
 
-    let counter = 0;
-
     for (const file of imageFiles) {
         const _file = path.basename(file);
         const fileType = path.extname(file).toLowerCase();
@@ -73,8 +71,6 @@ async function processFiles(files) {
         } catch (err) {
             console.error(`Error processing ${file}:`, err);
         }
-
-        counter++;
     }
 
     console.log("\n\x1b[32mOptimize images task completed!\n\x1b[0m");
