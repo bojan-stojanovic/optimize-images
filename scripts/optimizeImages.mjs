@@ -40,17 +40,17 @@ async function processFiles() {
             if (fileType === '.jpg' || fileType === '.jpeg') {
                 processedFile = sharp(file)
                     .jpeg({
-                        quality: 75,
+                        quality: 75, // quality, integer 1-100
                         mozjpeg: true,
                         progressive: true,
                     });
             } else if (fileType === '.png') {
                 processedFile = sharp(file)
                     .png({
-                        compressionLevel: 9,
-                        effort: 10,
+                        compressionLevel: 9, // zlib compression level, 0 (fastest, largest) to 9 (slowest, smallest)
+                        effort: 10, // CPU effort, between 1 (fastest) and 10 (slowest)
                         progressive: true,
-                        quality: 75,
+                        quality: 75, // use the lowest number of colours needed to achieve given quality
                     });
             }
 

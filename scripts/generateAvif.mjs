@@ -33,9 +33,9 @@ async function processFiles() {
 
             const info = await sharp(file)
                 .avif({
-                    quality: 50,
+                    quality: 50, // quality, integer 1-100
                     chromaSubsampling: "4:2:0",
-                    effort: 9,
+                    effort: 9, // CPU effort, between 0 (fastest) and 9 (slowest)
                 })
                 .toFile(outputPath);
 

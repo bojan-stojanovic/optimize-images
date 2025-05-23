@@ -34,16 +34,14 @@ async function processFiles() {
 
             let sharpInstance;
             let webpOptions = {
-                quality: 60,
-                effort: 6
+                quality: 60, // quality, integer 1-100
+                effort: 6 // CPU effort, between 0 (fastest) and 6 (slowest)
             };
             
             // Special handling for GIF files
             if (fileType === '.gif') {
                 sharpInstance = sharp(file, { animated: true });
-                // Add loop: 0 for infinite looping in animated WebP
                 webpOptions.loop = 0;
-                webpOptions.animationMode = 'loop';
             } else {
                 sharpInstance = sharp(file);
             }
