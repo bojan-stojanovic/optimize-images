@@ -1,10 +1,10 @@
 import path from 'path';
 import sharp from 'sharp';
 import fs from 'fs/promises';
-import { 
-    getFileList, 
+import {
+    getFileList,
     filterFilesByExtensions,
-    ensureOutputDir, 
+    ensureOutputDir,
     logOptimizationResult,
     logProcessStart,
     logProcessComplete,
@@ -16,7 +16,7 @@ async function processFiles() {
     logProcessStart('Image optimization');
 
     const files = await getFileList(INPUT_DIR);
-    const imageFiles = filterFilesByExtensions(files, ['.jpg', '.jpeg', '.png']);
+    const imageFiles = filterFilesByExtensions(files, ['.jpg', '.jpeg', '.png', '.gif']);
 
     if (imageFiles.length === 0) {
         console.log("\x1b[33mNo image files found in the input directory.\x1b[0m");
@@ -52,11 +52,17 @@ async function processFiles() {
                         progressive: true,
                         quality: 75, // use the lowest number of colours needed to achieve given quality
                     });
+            } else {
+              processedFile = sharp(file, { animated: true })
+                .gif({
+                    effort: 10, // CPU effort, between 1 (fastest) and 10 (slowest)
+                    loop: 0,
+                });
             }
 
             const info = await processedFile.toFile(outputPath);
             const optFileSize = info.size / 1024;
-            
+
             logOptimizationResult(filename, origFileSize, optFileSize);
         } catch (err) {
             console.error(`Error processing ${file}:`, err);

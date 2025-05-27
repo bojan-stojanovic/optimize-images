@@ -16,7 +16,7 @@ This project provides a set of scripts to:
 |-----------|:------------:|:---------------:|:---------------:|
 | JPG/JPEG  | ✅           | ✅              | ✅              |
 | PNG       | ✅           | ✅              | ✅              |
-| GIF       | -            | ✅ (animated)   | -               |
+| GIF       | ✅           | ✅ (animated)   | -               |
 | SVG       | ✅           | -               | -               |
 
 ## Getting Started
@@ -35,17 +35,17 @@ This project provides a set of scripts to:
    ```
    npm install
    ```
-   
+
    With yarn:
    ```
    yarn install
    ```
-   
+
    With pnpm:
    ```
    pnpm install
    ```
-   
+
    With bun:
    ```
    bun install
