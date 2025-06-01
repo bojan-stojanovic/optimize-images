@@ -5,7 +5,7 @@ A Node.js toolkit for optimizing images and generating next-gen formats using th
 ## Overview
 
 This project provides a set of scripts to:
-- Optimize JPG, JPEG, and PNG images with reduced file size while maintaining quality
+- Optimize JPG, JPEG, PNG and GIF images with reduced file size while maintaining quality
 - Convert images to next-gen formats (WebP and AVIF) for better web performance
 - Convert GIF animations to animated WebP for better performance
 - Optimize SVG files to reduce their size
@@ -61,7 +61,7 @@ This project provides a set of scripts to:
 
 | Command | Description |
 |---------|-------------|
-| `npm run optimize` | Optimizes JPG, JPEG, and PNG images with reduced file size |
+| `npm run optimize` | Optimizes JPG, JPEG, PNG and GIF images with reduced file size |
 | `npm run webp` | Generates WebP versions of JPG, JPEG, PNG, and animated GIF images |
 | `npm run avif` | Generates AVIF versions of JPG, JPEG, and PNG images |
 | `npm run svg` | Optimizes SVG images using SVGO |
@@ -74,7 +74,7 @@ You can also use yarn, pnpm, or bun instead of npm:
 
 ### Examples
 
-To optimize all JPG, JPEG, and PNG images:
+To optimize all JPG, JPEG, PNG and GIF images:
 ```
 npm run optimize
 ```
@@ -102,6 +102,7 @@ The scripts use the following default settings:
 - Output directory: `./img_dist`
 - JPG/JPEG optimization: 75% quality with mozjpeg and progressive encoding
 - PNG optimization: Level 9 compression with effort 10
+- GIF optimization: With effort 10
 - WebP conversion: 60% quality with effort 6
 - Animated WebP (from GIF): 60% quality with effort 6, preserving animation
 - AVIF conversion: 50% quality with 4:2:0 chroma subsampling and effort 9
