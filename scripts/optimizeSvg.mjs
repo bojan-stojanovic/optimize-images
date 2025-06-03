@@ -1,6 +1,6 @@
 import path from 'path';
-import { spawn } from 'child_process';
 import fs from 'fs/promises';
+import { optimize } from 'svgo';
 import { 
     getFileList, 
     filterFilesByExtensions,
@@ -11,22 +11,10 @@ import {
     INPUT_DIR
 } from './imageUtils.mjs';
 
-function optimizeSvg(inputPath, outputPath) {
-    return new Promise((resolve, reject) => {
-        const svgo = spawn('npx', ['svgo', '-i', inputPath, '-o', outputPath]);
-        
-        svgo.on('close', (code) => {
-            if (code === 0) {
-                resolve();
-            } else {
-                reject(new Error(`SVGO process exited with code ${code}`));
-            }
-        });
-        
-        svgo.on('error', (err) => {
-            reject(err);
-        });
-    });
+async function optimizeSvg(inputPath, outputPath) {
+    const data = await fs.readFile(inputPath, 'utf8');
+    const result = optimize(data);
+    await fs.writeFile(outputPath, result.data, 'utf8');
 }
 
 async function processSvgFiles() {
