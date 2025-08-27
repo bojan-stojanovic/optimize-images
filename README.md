@@ -23,7 +23,7 @@ This project provides a set of scripts to:
 
 ### Prerequisites
 
-- Node.js (v14 or later recommended)
+- Node.js (v18 or later recommended)
 - npm, yarn, pnpm, or bun package manager
 
 ### Installation
